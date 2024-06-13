@@ -3,13 +3,33 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Provider } from "react-redux";
+import { ThemeProvider, createTheme } from "@mui/material";
+import Store from "./Redux/Store/Store";
+
+const theme = createTheme({
+  typography: {
+    fontFamily: ["Poppins", "sans-serif"].join(","),
+    fontWeightBold: "bold",
+  },
+  palette: {
+    primary: {
+      main: "#703578",
+    },
+  },
+});
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
 root.render(
   <React.StrictMode>
-    <App />
+    <Provider store={Store}>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </Provider>
   </React.StrictMode>
 );
 
