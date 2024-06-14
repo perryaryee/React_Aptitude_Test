@@ -22,6 +22,7 @@ const CommentsApi = createApi({
     endpoints: (builder) => ({
         getArticleComments: builder.query<Comment[], string>({
             query: (slug) => `/articles/${slug}/comments`,
+            transformResponse: (response: any) => response.comments,
         }),
 
         createArticleComment: builder.mutation<Comment, { slug: string; body: string }>({

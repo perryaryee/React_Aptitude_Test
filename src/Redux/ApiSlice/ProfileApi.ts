@@ -1,8 +1,16 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Profile } from '../../Types/types';
+// import { Profile } from '../../Types/types';
 import { RootState, selectUserToken } from '../Slice/UserSlice';
 
 const baseUrl = 'https://api.realworld.io/api';
+
+export interface Profile {
+    username: string;
+    bio: string;
+    image: string;
+    following: boolean;
+}
+
 
 const baseQueryWithToken = fetchBaseQuery({
     baseUrl,
@@ -23,6 +31,7 @@ const ProfilesApi = createApi({
     endpoints: (builder) => ({
         getProfile: builder.query<Profile, string>({
             query: (username) => `/profiles/${username}`,
+            transformResponse: (response: any) => response.profile,
         }),
 
         followUser: builder.mutation<Profile, string>({

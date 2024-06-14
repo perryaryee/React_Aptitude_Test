@@ -40,7 +40,8 @@ const Login: React.FC = () => {
                 username: data.username,
                 email: data.email,
                 token: data.token
-            }))
+            }));
+            navigate("/");
 
         } catch (err) {
             console.error('Failed to register:', err);

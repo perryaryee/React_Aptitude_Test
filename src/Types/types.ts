@@ -24,7 +24,16 @@ export interface User {
     username: string;
     email: string;
     password?: string;
-    token?:string
+    token?: string,
+    image?: string,
+    bio?:string
+}
+
+export interface NewArticle {
+    title: string;
+    description: string;
+    body: string;
+    tagList: string[];
 }
 
 export interface LoginPayload {
@@ -47,15 +56,20 @@ export interface Comment {
     author: Author
 }
 
-export interface TagsResponse{
-    tags: string[];
-}
+// export interface TagsResponse {
+//     tags: string[];
+// }
 
+
+
+export interface ArticleResponse {
+    article: Article;
+}
 
 export interface RootState {
     user: {
         user: {
-            token: string | null; // Adjust according to your actual state structure
+            token: string | null; 
         };
     };
 }

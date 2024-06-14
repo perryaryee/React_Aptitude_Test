@@ -42,7 +42,7 @@ const SignUp: React.FC = () => {
                 token: data.token
             }))
 
-            // navigate('/login');
+            navigate('/');
         } catch (err) {
             console.error('Failed to register:', err);
         }

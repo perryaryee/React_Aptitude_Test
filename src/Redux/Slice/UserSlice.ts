@@ -34,6 +34,7 @@ export type RootState = {
 };
 
 export const selectUserToken = (state: RootState) => state.user?.user?.token;
+export const selectUsername = (state:RootState) => state.user?.user?.username;
 
 
 export default userSlice.reducer;
