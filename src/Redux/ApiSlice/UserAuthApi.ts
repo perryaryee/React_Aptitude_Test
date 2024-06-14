@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { User } from '../../Types/types';
+import { LoginPayload, User } from '../../Types/types';
 
 const baseUrl = 'https://api.realworld.io/api';
 
@@ -9,7 +9,7 @@ const UserApi = createApi({
     reducerPath: 'UserApi',
     baseQuery: fetchBaseQuery({ baseUrl }),
     endpoints: (builder) => ({
-        loginUser: builder.mutation<User, {  email: string; password: string }>({
+        loginUser: builder.mutation<User, LoginPayload>({
             query: ({ email, password }) => ({
                 url: '/users/login',
                 method: 'POST',
