@@ -20,9 +20,11 @@ export interface Article {
 }
 
 export interface User {
+    user?: any;
     username: string;
     email: string;
     password?: string;
+    token?:string
 }
 
 export interface Profile {
@@ -44,4 +46,12 @@ export interface TagsResponse{
     tags: string[];
 }
 
+
+export interface RootState {
+    user: {
+        user: {
+            token: string | null; // Adjust according to your actual state structure
+        };
+    };
+}
 

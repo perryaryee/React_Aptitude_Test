@@ -1,12 +1,25 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { Profile } from '../../Types/types';
+import { RootState, selectUserToken } from '../Slice/UserSlice';
 
 const baseUrl = 'https://api.realworld.io/api';
+
+const baseQueryWithToken = fetchBaseQuery({
+    baseUrl,
+    prepareHeaders: (headers, { getState }) => {
+        const token = selectUserToken(getState() as RootState); // Access token from Redux state
+        if (token) {
+            headers.set('Authorization', `Bearer ${token}`);
+        }
+        return headers;
+    },
+});
+
 
 
 const ProfilesApi = createApi({
     reducerPath: 'ProfilesApi',
-    baseQuery: fetchBaseQuery({ baseUrl }),
+    baseQuery: baseQueryWithToken,
     endpoints: (builder) => ({
         getProfile: builder.query<Profile, string>({
             query: (username) => `/profiles/${username}`,

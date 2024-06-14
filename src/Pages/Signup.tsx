@@ -1,31 +1,126 @@
-import React from 'react'
+import React, { ChangeEvent, FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { User } from '../Types/types';
+import { useRegisterUserMutation } from '../Redux/ApiSlice/UserAuthApi';
+import { useDispatch } from 'react-redux';
+import { Add_User } from '../Redux/Slice/UserSlice';
 
-const SignUp = () => {
+const SignUp: React.FC = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const [formData, setFormData] = useState<User>({
+        username: '',
+        email: '',
+        password: ''
+    });
 
+    const [registerUser, { isLoading, isError, error }] = useRegisterUserMutation();
 
+    const { username, email, password } = formData;
+
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (event: FormEvent) => {
+        event.preventDefault();
+        try {
+            const newUser = await registerUser({
+                username,
+                email,
+                password,
+            }).unwrap();
+
+            const data = newUser.user;
+            dispatch(Add_User({
+                username: data.username,
+                email: data.email,
+                token: data.token
+            }))
+
+            // navigate('/login');
+        } catch (err) {
+            console.error('Failed to register:', err);
+        }
+    };
+
+    const renderErrors = () => {
+        if (!isError || !error) return null;
+
+        const apiError = error as { data: { errors: Record<string, string[]> } };
+        const errorMessages = apiError.data.errors;
+
+        return (
+            <ul className="error-messages">
+                {Object.entries(errorMessages).map(([field, messages]) => (
+                    messages.map((message, index) => (
+                        <li key={`${field}-${index}`}>{field} {message}</li>
+                    ))
+                ))}
+            </ul>
+        );
+    };
 
     return (
-        <div className=' grid place-items-center'>
-            <div className=' mt-10'>
-                <div className=' space-y-4'>
-                    <h1 className=' text-center text-5xl'>Sign Up</h1>
-                    <p onClick={() => {
-                        navigate("/login")
-                    }} className=' text-center text-[#5CB85C] hover:underline cursor-pointer'>Have an account?</p>
-                </div>
-                <div className=' space-y-6 pt-4 px-2 lg:px-0'>
-                    <input placeholder='Username' className=' outline-none py-4 px-5 border border-[#dddddd] w-full rounded-[5px]' />
-                    <input placeholder='Email' className=' outline-none py-4 px-5  border border-[#dddddd] w-full rounded-[5px]' />
-                    <input placeholder='Password' className=' outline-none py-4 px-5  border border-[#dddddd] w-full rounded-[5px]' />
-                    <div className=' flex justify-end py-2'>
-                        <button className=' bg-[#5CB85C] text-[white] py-4 text-xl px-8 rounded-[5px] flex'>Sign in</button>
+        <div className="auth-page">
+            <div className="container page">
+                <div className="row">
+                    <div className="col-md-6 offset-md-3 col-xs-12">
+                        <h1 className="text-xs-center">Sign up</h1>
+                        <p className="text-xs-center">
+                            <a href="/login">Have an account?</a>
+                        </p>
+
+                        {renderErrors()}
+
+                        <form onSubmit={handleSubmit}>
+                            <fieldset className="form-group">
+                                <input
+                                    onChange={handleInputChange}
+                                    value={username}
+                                    name="username"
+                                    className="form-control form-control-lg"
+                                    type="text"
+                                    placeholder="Username"
+                                />
+                            </fieldset>
+                            <fieldset className="form-group">
+                                <input
+                                    onChange={handleInputChange}
+                                    value={email}
+                                    name="email"
+                                    className="form-control form-control-lg"
+                                    type="email"
+                                    placeholder="Email"
+                                />
+                            </fieldset>
+                            <fieldset className="form-group">
+                                <input
+                                    onChange={handleInputChange}
+                                    value={password}
+                                    name="password"
+                                    className="form-control form-control-lg"
+                                    type="password"
+                                    placeholder="Password"
+                                />
+                            </fieldset>
+                            <button
+                                className="btn btn-lg btn-primary pull-xs-right"
+                                type="submit"
+                                disabled={isLoading}
+                            >
+                                Sign up
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default SignUp;
