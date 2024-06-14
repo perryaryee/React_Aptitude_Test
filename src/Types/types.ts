@@ -27,6 +27,11 @@ export interface User {
     token?:string
 }
 
+export interface LoginPayload {
+    email: string;
+    password: string;
+}
+
 export interface Profile {
     username: string;
     bio: string;
