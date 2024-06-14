@@ -11,14 +11,15 @@ interface Props {
     description?: string,
     favoritesCount?: number,
     createdAt?: string,
-    slug: string
+    slug: string,
+    tagList?: string[];
 }
 
-const ArticleList: React.FC<Props> = ({ author, title, description, createdAt, favoritesCount, slug }) => {
+const ArticleList: React.FC<Props> = ({ author, title, description, createdAt, favoritesCount, slug, tagList }) => {
     return (
         <div className="article-preview">
             <div className="article-meta">
-                <a href="/profile/eric-simons"><img src="http://i.imgur.com/Qr71crq.jpg" /></a>
+                <a href="/profile/eric-simons"><img src={author?.image} /></a>
                 <div className="info">
                     {author && (
                         <a href={author.image} className="author">{author.username}</a>
@@ -33,13 +34,21 @@ const ArticleList: React.FC<Props> = ({ author, title, description, createdAt, f
                     <i className="ion-heart"></i> {favoritesCount}
                 </button>
             </div>
-            <Link to={`/article/${slug}`} className="preview-link"> {/* Replace with actual slug */}
-                <h1>{title}</h1>
-                <p>{description}</p>
-                <span>Read more...</span>
-                {/* You can add tags here if available */}
-                {/* Example: <ul className="tag-list">{tags.map(tag => <li className="tag-default tag-pill tag-outline">{tag}</li>)}</ul> */}
-            </Link>
+            {slug && (
+                <Link 
+                 to={`/articles/${slug}/favorite`}
+                // to={`/article/${slug}`} 
+                className="preview-link">
+                    <h1>{title}</h1>
+                    <p>{description}</p>
+                    <span>Read more...</span>
+                    <ul className="tag-list">
+                        {tagList?.map((tag, index) => (
+                            <li key={index} className="tag-default tag-pill tag-outline">{tag}</li>
+                        ))}
+                    </ul>
+                </Link>
+            )}
         </div>
     )
 }

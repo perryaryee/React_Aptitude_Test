@@ -6,15 +6,31 @@ import SignUp from "./Pages/Signup";
 import Header from './Compnoents/Header';
 import Home from "./Pages/Home";
 import Footer from './Compnoents/Footer';
+import ArticleDetails from "./Pages/ArticleDetails";
+import NewArticle from './Pages/NewArticle';
+import Setting from "./Pages/Settings";
+import Profile from './Pages/Profile';
+import { useSelector } from 'react-redux';
+import { selectUserToken, selectUsername } from './Redux/Slice/UserSlice';
+import Article from './Pages/Article';
+import EditArticle from './Pages/EditArticle';
+
 
 function App() {
+  const isLoggedIn = useSelector(selectUserToken);
   return (
     <BrowserRouter>
       <Header />
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<SignUp />} />
-        <Route path='/' element={<Home />} />
+        <Route path='/' element={isLoggedIn ? <Home /> : <Navigate to="/ogin" />} />
+        <Route path='/edit-article/:slug' element={isLoggedIn ? <EditArticle /> : <Navigate to="/ogin" />} />
+        <Route path='/article/:slug' element={isLoggedIn ? <ArticleDetails /> : <Navigate to="/ogin" />} />
+        <Route path='/new-article' element={isLoggedIn ? <NewArticle /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={isLoggedIn ? <Setting /> : <Navigate to="/login" />} />
+        <Route path='/profile/:username' element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
+        <Route path='/articles/:slug/favorite' element={isLoggedIn ? <Article /> : <Navigate to="/ogin" />} />
       </Routes>
       <Footer />
     </BrowserRouter>
