@@ -28,7 +28,7 @@ const NewArticleForm: React.FC = () => {
         try {
             const response = await postArticle(articleData).unwrap();
             console.log('Posted article:', response);
-            navigate('/'); // Redirect to home or article list page
+            navigate('/'); 
         } catch (error) {
             console.error('Failed to post article:', error);
         }
