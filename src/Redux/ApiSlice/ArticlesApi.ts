@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Article } from '../../Types/types';
+import { Article, ArticleResponse, NewArticle } from '../../Types/types';
 import { RootState, selectUserToken } from '../Slice/UserSlice';
 
 const baseUrl = 'https://api.realworld.io/api';
@@ -24,20 +24,21 @@ const ArticlesApi = createApi({
             query: () => '/articles/feed',
         }),
 
-        fetchArticlesData: builder.query<Article[], void>({ // Ensure this endpoint returns an array of articles
+        fetchArticlesData: builder.query<Article[], void>({ 
             query: () => '/articles/',
             transformResponse: (response: any) => response.articles,
         }),
 
         fetchOneArticleData: builder.query<Article, string>({
             query: (slug) => `/articles/${slug}`,
+            transformResponse: (response: any) => response.article,
         }),
 
-        postArticleData: builder.mutation<Article, Partial<Article>>({
-            query: (data) => ({
+        postArticleData: builder.mutation<ArticleResponse, { article: NewArticle }>({
+            query: (newArticle) => ({
                 url: '/articles',
                 method: 'POST',
-                body: data,
+                body: newArticle,
             }),
         }),
 
