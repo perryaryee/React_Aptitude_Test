@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { Article } from '../../Types/types';
-import { RootState, selectUserToken } from '../Slice/UserSlice'; // Adjust the path accordingly
+import { RootState, selectUserToken } from '../Slice/UserSlice';
 
 const baseUrl = 'https://api.realworld.io/api';
 
@@ -18,13 +18,18 @@ const baseQueryWithToken = fetchBaseQuery({
 
 const ArticlesApi = createApi({
     reducerPath: 'ArticlesApi',
-    baseQuery: baseQueryWithToken, // Use the modified baseQuery with token handling
+    baseQuery: baseQueryWithToken,
     endpoints: (builder) => ({
         fetchArticlesFeedData: builder.query<Article[], void>({
             query: () => '/articles/feed',
         }),
 
-        fetchArticlesData: builder.query<Article, string>({
+        fetchArticlesData: builder.query<Article[], void>({ // Ensure this endpoint returns an array of articles
+            query: () => '/articles/',
+            transformResponse: (response: any) => response.articles,
+        }),
+
+        fetchOneArticleData: builder.query<Article, string>({
             query: (slug) => `/articles/${slug}`,
         }),
 
@@ -55,6 +60,7 @@ const ArticlesApi = createApi({
 
 export const {
     useFetchArticlesFeedDataQuery,
+    useFetchOneArticleDataQuery,
     useFetchArticlesDataQuery,
     usePostArticleDataMutation,
     useUpdateArticleDataMutation,
