@@ -23,10 +23,10 @@ const ArticleDetails: React.FC = () => {
 
     const { author, title, description, body, tagList, createdAt, favoritesCount } = data || {};
     const authorName = author?.username || 'Unknown Author';
-    const authorImage = author?.image || 'default-image-path'; 
+    const authorImage = author?.image || 'default-image-path';
 
     return (
-    
+
         <div className="article-page">
             <div className="banner">
                 <div className="container">

@@ -24,13 +24,13 @@ function App() {
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<SignUp />} />
-        <Route path='/' element={isLoggedIn ? <Home /> : <Navigate to="/ogin" />} />
-        <Route path='/edit-article/:slug' element={isLoggedIn ? <EditArticle /> : <Navigate to="/ogin" />} />
-        <Route path='/article/:slug' element={isLoggedIn ? <ArticleDetails /> : <Navigate to="/ogin" />} />
+        <Route path='/' element={isLoggedIn ? <Home /> : <Navigate to="/login" />} />
+        <Route path='/edit-article/:slug' element={isLoggedIn ? <EditArticle /> : <Navigate to="/login" />} />
+        <Route path='/article/:slug' element={isLoggedIn ? <ArticleDetails /> : <Navigate to="/login" />} />
         <Route path='/new-article' element={isLoggedIn ? <NewArticle /> : <Navigate to="/login" />} />
         <Route path="/settings" element={isLoggedIn ? <Setting /> : <Navigate to="/login" />} />
         <Route path='/profile/:username' element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
-        <Route path='/articles/:slug/favorite' element={isLoggedIn ? <Article /> : <Navigate to="/ogin" />} />
+        <Route path='/articles/:slug/favorite' element={isLoggedIn ? <Article /> : <Navigate to="/login" />} />
       </Routes>
       <Footer />
     </BrowserRouter>
