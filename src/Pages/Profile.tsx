@@ -7,10 +7,10 @@ import { selectUsername } from '../Redux/Slice/UserSlice';
 
 const UserProfileComponent: React.FC = () => {
     const navigate = useNavigate();
-    const { username } = useParams<{ username?: string }>(); 
-   
+    const { username } = useParams<{ username?: string }>();
 
-    const { data: profileData, isLoading, isError } = useGetProfileQuery(username || ''); 
+
+    const { data: profileData, isLoading, isError } = useGetProfileQuery(username || '');
 
     if (!username) {
         return <div>Username not provided</div>;

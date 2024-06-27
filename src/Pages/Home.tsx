@@ -11,16 +11,13 @@ import { useGetTagsQuery } from '../Redux/ApiSlice/TagsApi';
 
 
 const Home = () => {
+  
   const isLoggedIn = useSelector(selectUserToken);
   const { data, error, isLoading, refetch } = useFetchArticlesDataQuery();
 
-
   const { data: tagsData, error: tagsError, isLoading: tagsLoading, refetch: refetchTags } = useGetTagsQuery();
 
-  console.log(tagsData);
-
   const { data: feedData, error: feedError, isLoading: feedLoading } = useFetchArticlesFeedDataQuery();
-  console.log(feedData);
 
 
   return (
