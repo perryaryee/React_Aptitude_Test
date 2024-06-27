@@ -1,29 +1,30 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import storage from "redux-persist/lib/storage"; // Default storage for redux-persist is local storage
-import { persistReducer, persistStore } from "redux-persist"; 
-import userReducer from "../Slice/UserSlice"; 
-import { ArticlesApi } from "../ApiSlice/ArticlesApi"; 
+import { persistReducer, persistStore } from "redux-persist";
+import userReducer from "../Slice/UserSlice";
+import { ArticlesApi } from "../ApiSlice/ArticlesApi";
 import CommentsApi from "../ApiSlice/CommentsApi";
-import TagsApi from "../ApiSlice/TagsApi"; 
-import FavoriteApi from "../ApiSlice/FavouritesApi"; 
-import ProfilesApi from "../ApiSlice/ProfileApi"; 
-import UserAuthApi from "../ApiSlice/UserAuthApi"; 
+import TagsApi from "../ApiSlice/TagsApi";
+import FavoriteApi from "../ApiSlice/FavouritesApi";
+import ProfilesApi from "../ApiSlice/ProfileApi";
+import UserAuthApi from "../ApiSlice/UserAuthApi";
 
 // Configuring redux-persist
 const persistConfig = {
     key: 'root', // Key for local storage
     storage, // Storage engine
+    blacklist: [ArticlesApi.reducerPath, CommentsApi.reducerPath, TagsApi.reducerPath, TagsApi.reducerPath, FavoriteApi.reducerPath, ProfilesApi.reducerPath],
 };
 
 // Combining all reducers
 const rootReducer = combineReducers({
     user: userReducer, // User slice reducer
-    [ArticlesApi.reducerPath]: ArticlesApi.reducer, 
-    [CommentsApi.reducerPath]: CommentsApi.reducer, 
-    [TagsApi.reducerPath]: TagsApi.reducer, 
-    [FavoriteApi.reducerPath]: FavoriteApi.reducer, 
+    [ArticlesApi.reducerPath]: ArticlesApi.reducer,
+    [CommentsApi.reducerPath]: CommentsApi.reducer,
+    [TagsApi.reducerPath]: TagsApi.reducer,
+    [FavoriteApi.reducerPath]: FavoriteApi.reducer,
     [ProfilesApi.reducerPath]: ProfilesApi.reducer,
-    [UserAuthApi.reducerPath]: UserAuthApi.reducer, 
+    [UserAuthApi.reducerPath]: UserAuthApi.reducer,
 });
 
 // Applying persistReducer to the root reducer
