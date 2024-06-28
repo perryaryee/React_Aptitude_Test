@@ -11,7 +11,7 @@ const Settings: React.FC = () => {
     const navigate = useNavigate()
     const { data: currentUserData, error: currentUserError, isLoading } = useGetCurrentUserQuery();
     console.log(currentUserData);
-    
+
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [image, setImage] = useState('');
@@ -42,22 +42,21 @@ const Settings: React.FC = () => {
             image,
             bio,
             password: newPassword
-            // Add other fields as needed
         };
 
         try {
             // Call updateCurrentUser mutation
             const updatedUser = await updateCurrentUser(userDataToUpdate).unwrap();
-            console.log('Updated user:', updatedUser);
-            navigate("/login");
-            // dispatch(Add_User({
 
-            // }))
-
-            // Optionally handle success (e.g., show success message, redirect, etc.)
+            navigate(`/profile/${updatedUser.username}`);
+            
+            dispatch(Add_User({
+                username: updatedUser.username,
+                email: updatedUser.email,
+            }))
+           
         } catch (error) {
             console.error('Failed to update user:', error);
-            // Handle error (e.g., show error message)
         }
     };
 
@@ -65,7 +64,7 @@ const Settings: React.FC = () => {
         return <div>Loading...</div>;
     }
 
-   
+
     const logout = () => {
         dispatch(ClearUser());
         navigate("/login")
