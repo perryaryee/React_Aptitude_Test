@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFavoriteArticleMutation, useUnfavoriteArticleMutation } from '../Redux/ApiSlice/FavouritesApi';
 import { useDeleteArticleDataMutation, useFetchOneArticleDataQuery } from '../Redux/ApiSlice/ArticlesApi';
@@ -15,6 +15,8 @@ const Article: React.FC = () => {
 
     // Fetch comments for the article
     const { data: commentsData, error: commentsError, isLoading: commentsLoading, refetch } = useGetArticleCommentsQuery(slug || '');
+
+
 
     // Mutation hooks for creating and deleting comments
 
@@ -56,25 +58,51 @@ const Article: React.FC = () => {
         }
     };
 
-    // Mutation hooks for favorite/unfavorite article
-    const [favoriteArticle, { isLoading: isFavoriting }] = useFavoriteArticleMutation();
-    const [unfavoriteArticle, { isLoading: isUnfavoriting }] = useUnfavoriteArticleMutation();
+
+    const [favoriteArticleMutation] = useFavoriteArticleMutation();
+    const [unfavoriteArticleMutation] = useUnfavoriteArticleMutation();
+
+    // State to track favorite status
+    const [favorited, setFavorited] = React.useState<boolean>(false);
+    const [loadingFavorite, setLoadingFavorite] = React.useState<boolean>(false);
+
+    useEffect(() => {
+        if (articleData) {
+            setFavorited(articleData.favorited);
+        }
+    }, [articleData]);
 
     const handleFavorite = async () => {
-        try {
-            await favoriteArticle(slug || '').unwrap();
-        } catch (error) {
-            console.error('Failed to favorite article:', error);
+        if (!loadingFavorite) {
+            setLoadingFavorite(true);
+            try {
+                await favoriteArticleMutation(slug!).unwrap();
+                setFavorited(true);
+            } catch (error) {
+                console.error('Failed to favorite article:', error);
+            } finally {
+                setLoadingFavorite(false);
+            }
         }
     };
 
     const handleUnfavorite = async () => {
-        try {
-            await unfavoriteArticle(slug || '').unwrap();
-        } catch (error) {
-            console.error('Failed to unfavorite article:', error);
+        if (!loadingFavorite) {
+            setLoadingFavorite(true);
+            try {
+                await unfavoriteArticleMutation(slug!).unwrap();
+                setFavorited(false);
+            } catch (error) {
+                console.error('Failed to unfavorite article:', error);
+            } finally {
+                setLoadingFavorite(false);
+            }
         }
     };
+
+    
+
+
 
     if (articleLoading || commentsLoading) {
         return <div>Loading...</div>;
@@ -111,13 +139,9 @@ const Article: React.FC = () => {
                             &nbsp; Follow {authorName} <span className="counter">(10)</span>
                         </button>
                         &nbsp;&nbsp;
-                        <button
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={handleFavorite}
-                            disabled={isFavoriting}
-                        >
+                        <button className="btn btn-sm btn-outline-primary" onClick={favorited ? handleUnfavorite : handleFavorite} disabled={loadingFavorite}>
                             <i className="ion-heart"></i>
-                            &nbsp; Favorite Post <span className="counter">({favoritesCount})</span>
+                            &nbsp; {favorited ? 'Unfavorite Post' : 'Favorite Post'} <span className="counter">({favoritesCount})</span>
                         </button>
                         <button onClick={() => {
                             navigate(`/edit-article/${slug}`)
