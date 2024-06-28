@@ -26,17 +26,23 @@ const EditArticle: React.FC = () => {
         }
     }, [data]);
 
+
+
     const handleSubmit = async () => {
         try {
             await updateArticleData({
                 slug: slug!,
-                data: { title, description, body, tagList }
-            }).unwrap();
+                article: { title, description, body, tagList }
+            }).unwrap().then((response) => {
+                console.log("updated Date", response.slug);
+
+            })
             navigate(`/article/${slug}`);
         } catch (error) {
             console.error('Failed to update the article:', error);
         }
     };
+
 
 
 

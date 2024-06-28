@@ -24,7 +24,7 @@ const ArticlesApi = createApi({
             query: () => '/articles/feed',
         }),
 
-        fetchArticlesData: builder.query<Article[], void>({ 
+        fetchArticlesData: builder.query<Article[], void>({
             query: () => '/articles/',
             transformResponse: (response: any) => response.articles,
         }),
@@ -42,11 +42,11 @@ const ArticlesApi = createApi({
             }),
         }),
 
-        updateArticleData: builder.mutation<Article, { slug: string; data: Partial<Article> }>({
-            query: ({ slug, data }) => ({
+        updateArticleData: builder.mutation<Article, { slug: string; article: Partial<Article> }>({
+            query: ({ slug, article }) => ({
                 url: `/articles/${slug}`,
                 method: 'PUT',
-                body: data,
+                body: { article },
             }),
         }),
 
