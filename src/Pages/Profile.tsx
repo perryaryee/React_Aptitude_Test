@@ -1,16 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useGetProfileQuery } from '../Redux/ApiSlice/ProfileApi';
-import { useSelector } from 'react-redux';
-import { selectUsername } from '../Redux/Slice/UserSlice';
-
+import { useFollowUserMutation, useGetProfileQuery, useUnfollowUserMutation } from '../Redux/ApiSlice/ProfileApi';
+import { useFetchArticlesFeedDataQuery, useFetchFavoritedArticlesQuery } from '../Redux/ApiSlice/ArticlesApi';
+import ArticleList from '../Compnoents/ArticleList';
+import { Article } from '../Types/types';
 
 const UserProfileComponent: React.FC = () => {
     const navigate = useNavigate();
     const { username } = useParams<{ username?: string }>();
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [totalPages, setTotalPages] = useState<number>(1);
+    const handlePageChange = (page: number) => setCurrentPage(page);
 
+    const { data: Favorited_Articles, error, isLoading: Favorited_Loading } = useFetchFavoritedArticlesQuery(
+        { username: username || '', page: currentPage },
+        { skip: !username }
+    );
 
-    const { data: profileData, isLoading, isError } = useGetProfileQuery(username || '');
+    const { data: MyfeedData, error: MyfeedError, isLoading: MyfeedLoading } = useFetchArticlesFeedDataQuery({ page: currentPage });
+
+    const [activeTab, setActiveTab] = useState<'My Articles' | 'Favorited Articles'>('My Articles');
+    const handleTabClick = (tab: 'My Articles' | 'Favorited Articles') => setActiveTab(tab);
+
+    const articles = activeTab === 'My Articles' ? MyfeedData?.articles : Favorited_Articles?.articles;
+    const articlesCount = activeTab === 'My Articles' ? MyfeedData?.articlesCount : Favorited_Articles?.articlesCount;
+
+    useEffect(() => {
+        if (articlesCount) {
+            setTotalPages(Math.ceil(articlesCount / 10)); // Assuming 10 articles per page
+        }
+    }, [articlesCount]);
+
+    const { data: profileData, isLoading, isError, refetch } = useGetProfileQuery(username || '');
+
+    const [followUser, { isLoading: followLoading }] = useFollowUserMutation();
+    const [unfollowUser, { isLoading: unfollowLoading }] = useUnfollowUserMutation();
+
+    const handleFollow = async () => {
+        try {
+            await followUser(username!).unwrap();
+            refetch(); // Refetch profile data to update the follow status
+        } catch (error) {
+            console.error('Failed to follow the user:', error);
+        }
+    };
+
+    const handleUnfollow = async () => {
+        try {
+            await unfollowUser(username!).unwrap();
+            refetch(); // Refetch profile data to update the follow status
+        } catch (error) {
+            console.error('Failed to unfollow the user:', error);
+        }
+    };
 
     if (!username) {
         return <div>Username not provided</div>;
@@ -32,19 +74,32 @@ const UserProfileComponent: React.FC = () => {
                 <div className="container">
                     <div className="row">
                         <div className="col-xs-12 col-md-10 offset-md-1">
-                            <img src={image} className="user-img" />
+                            <img src={image} className="user-img" alt="User" />
                             <h4>{profileUsername}</h4>
-                            <p>
-                                Cofounder @GoThinkster, lived in Aol's HQ for a few months, kinda looks like Peeta from
-                                the Hunger Games
-                            </p>
-                            <button className="btn btn-sm btn-outline-secondary action-btn">
-                                <i className="ion-plus-round"></i>
-                                &nbsp; Follow {profileUsername}
-                            </button>
-                            <button onClick={() => {
-                                navigate("/settings")
-                            }} className="btn btn-sm btn-outline-secondary action-btn">
+                            <p>{bio}</p>
+                            {following ? (
+                                <button
+                                    disabled={unfollowLoading || followLoading}
+                                    onClick={handleUnfollow}
+                                    className="btn btn-sm btn-outline-secondary action-btn"
+                                >
+                                    <i className="ion-plus-round"></i>
+                                    &nbsp; Unfollow {profileUsername}
+                                </button>
+                            ) : (
+                                <button
+                                    disabled={followLoading || unfollowLoading}
+                                    onClick={handleFollow}
+                                    className="btn btn-sm btn-outline-secondary action-btn"
+                                >
+                                    <i className="ion-plus-round"></i>
+                                    &nbsp; Follow {profileUsername}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => navigate('/settings')}
+                                className="btn btn-sm btn-outline-secondary action-btn mx-2"
+                            >
                                 <i className="ion-gear-a"></i>
                                 &nbsp; Edit Profile Settings
                             </button>
@@ -59,65 +114,49 @@ const UserProfileComponent: React.FC = () => {
                         <div className="articles-toggle">
                             <ul className="nav nav-pills outline-active">
                                 <li className="nav-item">
-                                    <a className="nav-link active" href="">My Articles</a>
+                                    <a
+                                        onClick={() => handleTabClick('My Articles')}
+                                        className={`nav-link ${activeTab === 'My Articles' ? 'active' : ''}`}
+                                        href="#"
+                                    >
+                                        My Articles
+                                    </a>
                                 </li>
                                 <li className="nav-item">
-                                    <a className="nav-link" href="">Favorited Articles</a>
+                                    <a
+                                        onClick={() => handleTabClick('Favorited Articles')}
+                                        className={`nav-link ${activeTab === 'Favorited Articles' ? 'active' : ''}`}
+                                        href="#"
+                                    >
+                                        Favorited Articles
+                                    </a>
                                 </li>
                             </ul>
                         </div>
+                        {activeTab === 'My Articles' && MyfeedLoading && <h1>Loading My Feed...</h1>}
+                        {activeTab === 'Favorited Articles' && Favorited_Loading && <h1>Loading Favorited Articles...</h1>}
 
-                        <div className="article-preview">
-                            <div className="article-meta">
-                                <a href="/profile/eric-simons"><img src="http://i.imgur.com/Qr71crq.jpg" /></a>
-                                <div className="info">
-                                    <a href="/profile/eric-simons" className="author">Eric Simons</a>
-                                    <span className="date">January 20th</span>
-                                </div>
-                                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                                    <i className="ion-heart"></i> 29
-                                </button>
-                            </div>
-                            <a href="/article/how-to-buil-webapps-that-scale" className="preview-link">
-                                <h1>How to build webapps that scale</h1>
-                                <p>This is the description for the post.</p>
-                                <span>Read more...</span>
-                                <ul className="tag-list">
-                                    <li className="tag-default tag-pill tag-outline">realworld</li>
-                                    <li className="tag-default tag-pill tag-outline">implementations</li>
-                                </ul>
-                            </a>
-                        </div>
-
-                        <div className="article-preview">
-                            <div className="article-meta">
-                                <a href="/profile/albert-pai"><img src="http://i.imgur.com/N4VcUeJ.jpg" /></a>
-                                <div className="info">
-                                    <a href="/profile/albert-pai" className="author">Albert Pai</a>
-                                    <span className="date">January 20th</span>
-                                </div>
-                                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                                    <i className="ion-heart"></i> 32
-                                </button>
-                            </div>
-                            <a href="/article/the-song-you" className="preview-link">
-                                <h1>The song you won't ever stop singing. No matter how hard you try.</h1>
-                                <p>This is the description for the post.</p>
-                                <span>Read more...</span>
-                                <ul className="tag-list">
-                                    <li className="tag-default tag-pill tag-outline">Music</li>
-                                    <li className="tag-default tag-pill tag-outline">Song</li>
-                                </ul>
-                            </a>
-                        </div>
+                        {articles?.map((article: Article) => (
+                            <ArticleList
+                                key={article.slug}
+                                author={article.author}
+                                createdAt={article.createdAt}
+                                title={article.title}
+                                description={article.description}
+                                favoritesCount={article.favoritesCount}
+                                slug={article.slug}
+                                tagList={article.tagList}
+                            />
+                        ))}
 
                         <ul className="pagination">
-                            <li className="page-item active">
-                                <a className="page-link" href="">1</a>
-                            </li>
-                            <li className="page-item">
-                                <a className="page-link" href="">2</a>
-                            </li>
+                            {Array.from({ length: totalPages }, (_, index) => (
+                                <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                    <a className="page-link" href="#" onClick={() => handlePageChange(index + 1)}>
+                                        {index + 1}
+                                    </a>
+                                </li>
+                            ))}
                         </ul>
                     </div>
                 </div>
@@ -127,3 +166,16 @@ const UserProfileComponent: React.FC = () => {
 };
 
 export default UserProfileComponent;
+
+
+
+
+
+
+
+
+
+
+
+
+

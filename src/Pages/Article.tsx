@@ -5,6 +5,7 @@ import { useDeleteArticleDataMutation, useFetchOneArticleDataQuery } from '../Re
 import { useGetArticleCommentsQuery, useCreateArticleCommentMutation, useDeleteArticleCommentMutation } from '../Redux/ApiSlice/CommentsApi';
 import { Comment } from '../Types/types';
 import { IconButton } from '@mui/material';
+import { useFollowUserMutation, useGetProfileQuery, useUnfollowUserMutation } from '../Redux/ApiSlice/ProfileApi';
 
 const Article: React.FC = () => {
     const navigate = useNavigate();
@@ -13,8 +14,43 @@ const Article: React.FC = () => {
     // Fetch article data based on the slug
     const { data: articleData, error: articleError, isLoading: articleLoading } = useFetchOneArticleDataQuery(slug || '');
 
+    const username = articleData?.author.username
+    const { data: profileData, isLoading, isError } = useGetProfileQuery(username || "");
+
+    console.log("Profile Data", profileData);
+
+
+
+
+    const handleFollow = async () => {
+        try {
+            await followUser(authorName!).unwrap();
+        } catch (error) {
+            console.error('Failed to follow the user:', error);
+        }
+    };
+
+    const handleUnfollow = async () => {
+        try {
+            await unfollowUser(authorName!).unwrap();
+        } catch (error) {
+            console.error('Failed to unfollow the user:', error);
+        }
+    };
+
+
     // Fetch comments for the article
     const { data: commentsData, error: commentsError, isLoading: commentsLoading, refetch } = useGetArticleCommentsQuery(slug || '');
+
+    //get profile
+
+    // const { data: profile, error: profileError, isLoading: profileLoading } = useGetProfileQuery(authorName!);
+
+    // follow or unfolower 
+
+    const [followUser, { isLoading: followLoading }] = useFollowUserMutation();
+    const [unfollowUser, { isLoading: unfollowLoading }] = useUnfollowUserMutation();
+
 
 
 
@@ -100,7 +136,9 @@ const Article: React.FC = () => {
         }
     };
 
-    
+
+
+
 
 
 
@@ -134,18 +172,31 @@ const Article: React.FC = () => {
                             <a href={`/profile/${author?.username}`} className="author">{authorName}</a>
                             <span className="date">{createdAt}</span>
                         </div>
+                        {/* {
+                            profile?.following ? (
+                                <button className="btn btn-sm btn-outline-secondary" onClick={handleUnfollow}>
+                                    <i className="ion-minus-round"></i>
+                                    &nbsp; Unfollow {profile?.username}
+                                </button>
+                            ) : (
+                                <button className="btn btn-sm btn-outline-secondary" onClick={handleFollow}>
+                                    <i className="ion-plus-round"></i>
+                                    &nbsp; Follow {profile?.username}
+                                </button>
+                            )
+                        } */}
                         <button className="btn btn-sm btn-outline-secondary">
                             <i className="ion-plus-round"></i>
                             &nbsp; Follow {authorName} <span className="counter">(10)</span>
                         </button>
                         &nbsp;&nbsp;
-                        <button className="btn btn-sm btn-outline-primary" onClick={favorited ? handleUnfavorite : handleFavorite} disabled={loadingFavorite}>
+                        <button className="btn btn-sm btn-outline-primary mx-2" onClick={favorited ? handleUnfavorite : handleFavorite} disabled={loadingFavorite}>
                             <i className="ion-heart"></i>
                             &nbsp; {favorited ? 'Unfavorite Post' : 'Favorite Post'} <span className="counter">({favoritesCount})</span>
                         </button>
                         <button onClick={() => {
                             navigate(`/edit-article/${slug}`)
-                        }} className="btn btn-sm btn-outline-secondary">
+                        }} className="btn btn-sm btn-outline-secondary mx-2">
                             <i className="ion-edit"></i> Edit Article
                         </button>
                         <button onClick={handleDelete} className="btn btn-sm btn-outline-danger">
@@ -171,7 +222,7 @@ const Article: React.FC = () => {
                 <hr />
 
                 {/* Comment Form */}
-                <form className="card comment-form" onSubmit={(e) => { e.preventDefault(); handlePostComment(); }}>
+                <form className="card comment-form mt-3" onSubmit={(e) => { e.preventDefault(); handlePostComment(); }}>
                     <div className="card-block">
                         <textarea
                             className="form-control"

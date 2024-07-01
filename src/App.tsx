@@ -22,9 +22,9 @@ function App() {
     <BrowserRouter>
       <Header />
       <Routes>
+      <Route path='/' element={ <Home /> } />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<SignUp />} />
-        <Route path='/' element={isLoggedIn ? <Home /> : <Navigate to="/login" />} />
         <Route path='/edit-article/:slug' element={isLoggedIn ? <EditArticle /> : <Navigate to="/login" />} />
         <Route path='/article/:slug' element={isLoggedIn ? <ArticleDetails /> : <Navigate to="/login" />} />
         <Route path='/new-article' element={isLoggedIn ? <NewArticle /> : <Navigate to="/login" />} />

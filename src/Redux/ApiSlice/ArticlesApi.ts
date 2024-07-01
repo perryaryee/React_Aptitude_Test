@@ -20,13 +20,23 @@ const ArticlesApi = createApi({
     reducerPath: 'ArticlesApi',
     baseQuery: baseQueryWithToken,
     endpoints: (builder) => ({
-        fetchArticlesFeedData: builder.query<Article[], void>({
-            query: () => '/articles/feed',
+        fetchArticlesFeedData: builder.query<{ articles: Article[], articlesCount: number }, { page: number }>({
+            query: ({ page }) => `/articles/feed?limit=10&offset=${(page - 1) * 10}`,
+            transformResponse: (response: any) => response,
         }),
 
-        fetchArticlesData: builder.query<Article[], void>({
-            query: () => '/articles/',
+        fetchArticlesData: builder.query<{ articles: Article[], articlesCount: number }, { page: number }>({
+            query: ({ page }) => `/articles?limit=10&offset=${(page - 1) * 10}`,
+            transformResponse: (response: any) => response,
+        }),
+
+        fetchArticlesByTag: builder.query<Article[], string | null>({
+            query: (tag) => tag ? `/articles?tag=${tag}` : '',
             transformResponse: (response: any) => response.articles,
+        }),
+        fetchFavoritedArticles: builder.query<{ articles: Article[], articlesCount: number }, { username: string, page: number }>({
+            query: ({ username, page }) => `/articles?favorited=${username}&limit=10&offset=${(page - 1) * 10}`,
+            transformResponse: (response: any) => response,
         }),
 
         fetchOneArticleData: builder.query<Article, string>({
@@ -48,6 +58,7 @@ const ArticlesApi = createApi({
                 method: 'PUT',
                 body: { article },
             }),
+            transformResponse: (response: any) => response.article,
         }),
 
         deleteArticleData: builder.mutation<void, string>({
@@ -56,6 +67,7 @@ const ArticlesApi = createApi({
                 method: 'DELETE',
             }),
         }),
+
     }),
 });
 
@@ -66,6 +78,17 @@ export const {
     usePostArticleDataMutation,
     useUpdateArticleDataMutation,
     useDeleteArticleDataMutation,
+    useFetchArticlesByTagQuery,
+    useFetchFavoritedArticlesQuery,
 } = ArticlesApi;
 
 export { ArticlesApi };
+
+
+
+
+
+
+
+
+

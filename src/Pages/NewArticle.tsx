@@ -95,7 +95,7 @@ const NewArticleForm: React.FC = () => {
                                         value={tagInput}
                                         onChange={handleTagInput}
                                     />
-                                    <button type="button" onClick={handleAddTag}>
+                                    <button className=' text-white bg-[#5CB85C] mt-2 px-2 py-1 rounded-sm outline-none' type="button" onClick={handleAddTag}>
                                         Add Tag
                                     </button>
                                 </fieldset>
