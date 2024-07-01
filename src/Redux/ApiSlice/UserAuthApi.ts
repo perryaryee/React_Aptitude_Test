@@ -46,6 +46,7 @@ const UserApi = createApi({
                 method: 'PUT',
                 body: { user: data },
             }),
+            // transformResponse: (response: any) => response.user,
         }),
 
     }),

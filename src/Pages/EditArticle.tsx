@@ -1,9 +1,9 @@
-
-
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFetchOneArticleDataQuery, useUpdateArticleDataMutation, useDeleteArticleDataMutation } from '../Redux/ApiSlice/ArticlesApi';
+import { useDeleteArticleDataMutation, useFetchOneArticleDataQuery, useUpdateArticleDataMutation } from '../Redux/ApiSlice/ArticlesApi';
+import { useSelector } from 'react-redux';
+import { RootState, selectUserToken } from '../Redux/Slice/UserSlice';
+import { Article } from '../Types/types';
 
 const EditArticle: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
@@ -11,6 +11,8 @@ const EditArticle: React.FC = () => {
 
     const { data, error, isLoading } = useFetchOneArticleDataQuery(slug!);
     const [updateArticleData] = useUpdateArticleDataMutation();
+
+    const token = useSelector((state: RootState) => selectUserToken(state));
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -27,24 +29,38 @@ const EditArticle: React.FC = () => {
     }, [data]);
 
 
+ 
+    const [deleteArticleData] = useDeleteArticleDataMutation();
 
-    const handleSubmit = async () => {
+    const handleDeleteArticle = async (event :any) => {
+        event.preventDefault();
+        
         try {
-            await updateArticleData({
-                slug: slug!,
-                article: { title, description, body, tagList }
-            }).unwrap().then((response) => {
-                console.log("updated Date", response.slug);
-
-            })
-            navigate(`/article/${slug}`);
+            await deleteArticleData(slug!).unwrap();
+            navigate('/');
         } catch (error) {
-            console.error('Failed to update the article:', error);
+            console.error('Failed to delete the article:', error);
         }
     };
 
 
+    const handleSubmit = async () => {
+        if (!token) {
+            console.error('No token found. Please log in.');
+            return;
+        }
 
+        try {
+            const updatedArticle: Article = await updateArticleData({
+                slug: slug!,
+                article: { title, description, body, tagList },
+            }).unwrap();
+
+            navigate(`/article/${updatedArticle.slug}`);
+        } catch (error) {
+            console.error('Failed to update the article:', error);
+        }
+    };
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -107,10 +123,14 @@ const EditArticle: React.FC = () => {
                                         ))}
                                     </div>
                                 </fieldset>
-                                <button className="btn btn-lg pull-xs-right btn-primary" type="button" onClick={handleSubmit}>
-                                    Edit Article
-                                </button>
-
+                                <div className=' flex justify-end '>
+                                    <button onClick={handleDeleteArticle} className="btn btn-lg btn-outline-danger mx-2">
+                                        <i className="ion-trash-a"></i> Delete Article
+                                    </button>
+                                    <button className="btn btn-lg pull-xs-right btn-primary" type="button" onClick={handleSubmit}>
+                                        Edit Article
+                                    </button>
+                                </div>
                             </fieldset>
                         </form>
                     </div>
@@ -121,3 +141,22 @@ const EditArticle: React.FC = () => {
 };
 
 export default EditArticle;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

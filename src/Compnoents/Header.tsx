@@ -1,57 +1,57 @@
-import React from 'react'
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectUserToken, selectUsername } from '../Redux/Slice/UserSlice';
+import { useLocation, Link } from 'react-router-dom';
 
 const Header = () => {
     const isLoggedIn = useSelector(selectUserToken);
     const username = useSelector(selectUsername);
+    const location = useLocation();
 
+    const getNavLinkClass = (path: string) => {
+        return location.pathname === path ? 'nav-link active' : 'nav-link';
+    };
 
     return (
-        <>
-            {isLoggedIn ? <nav className="navbar navbar-light">
-                <div className="container">
-                    <a className="navbar-brand" href="/">conduit</a>
-                    <ul className="nav navbar-nav pull-xs-right">
-                        <li className="nav-item">
-
-                            <a className="nav-link active" href="/">Home</a>
-                        </li>
-                        <li className="nav-item">
-                            <a className="nav-link" href="/new-article"> <i className="ion-compose"></i>&nbsp;New Article </a>
-                        </li>
-                        <li className="nav-item">
-                            <a className="nav-link" href="/settings"> <i className="ion-gear-a"></i>&nbsp;Settings </a>
-                        </li>
-                        <li className="nav-item">
-                            <a className="nav-link" href={`/profile/${username}`}>
-                                <img src="" className="user-pic" />
-                                {username}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav> :
-                <nav className="navbar navbar-light">
-                    <div className="container">
-                        <a className="navbar-brand" href="/">conduit</a>
-                        <ul className="nav navbar-nav pull-xs-right">
+        <nav className="navbar navbar-light px-0 lg:px-40">
+            <div className="container">
+                <Link className="navbar-brand" to="/">conduit</Link>
+                <ul className="nav navbar-nav pull-xs-right">
+                    <li className="nav-item">
+                        <Link className={getNavLinkClass('/')} to="/">Home</Link>
+                    </li>
+                    {isLoggedIn ? (
+                        <>
                             <li className="nav-item">
-
-                                <a className="nav-link active" href="/">Home</a>
+                                <Link className={getNavLinkClass('/new-article')} to="/new-article">
+                                    <i className="ion-compose"></i>&nbsp;New Article
+                                </Link>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link" href="/login">Sign in</a>
+                                <Link className={getNavLinkClass('/settings')} to="/settings">
+                                    <i className="ion-gear-a"></i>&nbsp;Settings
+                                </Link>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link" href="/register">Sign up</a>
+                                <Link className={getNavLinkClass(`/profile/${username}`)} to={`/profile/${username}`}>
+                                    {username}
+                                </Link>
                             </li>
-                        </ul>
-                    </div>
-                </nav>
-            }
-        </>
-    )
-}
+                        </>
+                    ) : (
+                        <>
+                            <li className="nav-item">
+                                <Link className={getNavLinkClass('/login')} to="/login">Sign in</Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link className={getNavLinkClass('/register')} to="/register">Sign up</Link>
+                            </li>
+                        </>
+                    )}
+                </ul>
+            </div>
+        </nav>
+    );
+};
 
 export default Header;
