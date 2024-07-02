@@ -10,14 +10,20 @@ const UserProfileComponent: React.FC = () => {
     const { username } = useParams<{ username?: string }>();
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
+    
     const handlePageChange = (page: number) => setCurrentPage(page);
 
-    const { data: Favorited_Articles, error, isLoading: Favorited_Loading } = useFetchFavoritedArticlesQuery(
+    const { data: Favorited_Articles, error, isLoading: Favorited_Loading, refetch: refreshFavorites } = useFetchFavoritedArticlesQuery(
         { username: username || '', page: currentPage },
         { skip: !username }
     );
 
-    const { data: MyfeedData, error: MyfeedError, isLoading: MyfeedLoading } = useFetchArticlesFeedDataQuery({ page: currentPage });
+    const { data: MyfeedData, error: MyfeedError, isLoading: MyfeedLoading, refetch: FeedLoading } = useFetchArticlesFeedDataQuery({ page: currentPage });
+
+    useEffect(() => {
+        refreshFavorites();
+        FeedLoading();
+    }, []);
 
     const [activeTab, setActiveTab] = useState<'My Articles' | 'Favorited Articles'>('My Articles');
     const handleTabClick = (tab: 'My Articles' | 'Favorited Articles') => setActiveTab(tab);
@@ -32,6 +38,11 @@ const UserProfileComponent: React.FC = () => {
     }, [articlesCount]);
 
     const { data: profileData, isLoading, isError, refetch } = useGetProfileQuery(username || '');
+
+    useEffect(() => {
+        refetch();
+    }, [])
+    
 
     const [followUser, { isLoading: followLoading }] = useFollowUserMutation();
     const [unfollowUser, { isLoading: unfollowLoading }] = useUnfollowUserMutation();
@@ -67,6 +78,7 @@ const UserProfileComponent: React.FC = () => {
     }
 
     const { username: profileUsername, bio, image, following } = profileData;
+    
 
     return (
         <div className="profile-page">

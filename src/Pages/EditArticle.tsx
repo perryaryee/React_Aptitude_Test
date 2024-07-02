@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useDeleteArticleDataMutation, useFetchOneArticleDataQuery, useUpdateArticleDataMutation } from '../Redux/ApiSlice/ArticlesApi';
+import { useDeleteArticleDataMutation, useFetchArticlesDataQuery, useFetchOneArticleDataQuery, useUpdateArticleDataMutation } from '../Redux/ApiSlice/ArticlesApi';
 import { useSelector } from 'react-redux';
 import { RootState, selectUserToken } from '../Redux/Slice/UserSlice';
 import { Article } from '../Types/types';
@@ -29,14 +29,15 @@ const EditArticle: React.FC = () => {
     }, [data]);
 
 
- 
+
     const [deleteArticleData] = useDeleteArticleDataMutation();
 
-    const handleDeleteArticle = async (event :any) => {
+    const handleDeleteArticle = async (event: any) => {
         event.preventDefault();
-        
+
         try {
             await deleteArticleData(slug!).unwrap();
+            // refetch();
             navigate('/');
         } catch (error) {
             console.error('Failed to delete the article:', error);

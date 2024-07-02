@@ -1,11 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFavoriteArticleMutation, useUnfavoriteArticleMutation } from '../Redux/ApiSlice/FavouritesApi';
-import { useDeleteArticleDataMutation, useFetchOneArticleDataQuery } from '../Redux/ApiSlice/ArticlesApi';
-import { useGetArticleCommentsQuery, useCreateArticleCommentMutation, useDeleteArticleCommentMutation } from '../Redux/ApiSlice/CommentsApi';
+import {
+    useFavoriteArticleMutation,
+    useUnfavoriteArticleMutation
+} from '../Redux/ApiSlice/FavouritesApi';
+import {
+    useDeleteArticleDataMutation,
+    useFetchOneArticleDataQuery
+} from '../Redux/ApiSlice/ArticlesApi';
+import {
+    useGetArticleCommentsQuery,
+    useCreateArticleCommentMutation,
+    useDeleteArticleCommentMutation
+} from '../Redux/ApiSlice/CommentsApi';
 import { Comment } from '../Types/types';
 import { IconButton } from '@mui/material';
-import { useFollowUserMutation, useGetProfileQuery, useUnfollowUserMutation } from '../Redux/ApiSlice/ProfileApi';
+import {
+    useFollowUserMutation,
+    useGetProfileQuery,
+    useUnfollowUserMutation
+} from '../Redux/ApiSlice/ProfileApi';
 
 const Article: React.FC = () => {
     const navigate = useNavigate();
@@ -14,48 +28,10 @@ const Article: React.FC = () => {
     // Fetch article data based on the slug
     const { data: articleData, error: articleError, isLoading: articleLoading } = useFetchOneArticleDataQuery(slug || '');
 
-    const username = articleData?.author.username
-    const { data: profileData, isLoading, isError } = useGetProfileQuery(username || "");
-
-    console.log("Profile Data", profileData);
-
-
-
-
-    const handleFollow = async () => {
-        try {
-            await followUser(authorName!).unwrap();
-        } catch (error) {
-            console.error('Failed to follow the user:', error);
-        }
-    };
-
-    const handleUnfollow = async () => {
-        try {
-            await unfollowUser(authorName!).unwrap();
-        } catch (error) {
-            console.error('Failed to unfollow the user:', error);
-        }
-    };
-
-
     // Fetch comments for the article
     const { data: commentsData, error: commentsError, isLoading: commentsLoading, refetch } = useGetArticleCommentsQuery(slug || '');
 
-    //get profile
-
-    // const { data: profile, error: profileError, isLoading: profileLoading } = useGetProfileQuery(authorName!);
-
-    // follow or unfolower 
-
-    const [followUser, { isLoading: followLoading }] = useFollowUserMutation();
-    const [unfollowUser, { isLoading: unfollowLoading }] = useUnfollowUserMutation();
-
-
-
-
     // Mutation hooks for creating and deleting comments
-
     const [deleteArticleData] = useDeleteArticleDataMutation();
 
     const handleDelete = async () => {
@@ -93,7 +69,6 @@ const Article: React.FC = () => {
             console.error('Failed to delete comment:', error);
         }
     };
-
 
     const [favoriteArticleMutation] = useFavoriteArticleMutation();
     const [unfavoriteArticleMutation] = useUnfavoriteArticleMutation();
@@ -136,13 +111,31 @@ const Article: React.FC = () => {
         }
     };
 
+    // Profile hooks
+    const authorName = articleData?.author?.username || '';
+    const { data: profileData, isLoading: profileDataLoading, isError, refetch: refreshData } = useGetProfileQuery(authorName);
+    const [followUser, { isLoading: followLoading }] = useFollowUserMutation();
+    const [unfollowUser, { isLoading: unfollowLoading }] = useUnfollowUserMutation();
 
+    const handleFollow = async () => {
+        try {
+            await followUser(authorName).unwrap();
+            refreshData(); // Refetch profile data to update the follow status
+        } catch (error) {
+            console.error('Failed to follow the user:', error);
+        }
+    };
 
+    const handleUnfollow = async () => {
+        try {
+            await unfollowUser(authorName).unwrap();
+            refreshData(); // Refetch profile data to update the follow status
+        } catch (error) {
+            console.error('Failed to unfollow the user:', error);
+        }
+    };
 
-
-
-
-    if (articleLoading || commentsLoading) {
+    if (articleLoading || commentsLoading || profileDataLoading) {
         return <div>Loading...</div>;
     }
 
@@ -155,48 +148,36 @@ const Article: React.FC = () => {
     }
 
     const { author, title, description, body, tagList, createdAt, favoritesCount } = articleData;
-    const authorName = author?.username || 'Unknown Author';
     const authorImage = author?.image || 'default-image-path';
-
-
-
 
     return (
         <div className="article-page">
             <div className="banner">
-                <div className="container">
+                <div className="container  px-3 lg:px-40">
                     <h1>{title}</h1>
                     <div className="article-meta">
                         <a href={`/profile/${author?.username}`}><img src={authorImage} alt="Author" /></a>
                         <div className="info">
                             <a href={`/profile/${author?.username}`} className="author">{authorName}</a>
-                            <span className="date">{createdAt}</span>
+                            <span className="date">{new Date(createdAt).toDateString()}</span>
                         </div>
-                        {/* {
-                            profile?.following ? (
-                                <button className="btn btn-sm btn-outline-secondary" onClick={handleUnfollow}>
-                                    <i className="ion-minus-round"></i>
-                                    &nbsp; Unfollow {profile?.username}
-                                </button>
-                            ) : (
-                                <button className="btn btn-sm btn-outline-secondary" onClick={handleFollow}>
-                                    <i className="ion-plus-round"></i>
-                                    &nbsp; Follow {profile?.username}
-                                </button>
-                            )
-                        } */}
-                        <button className="btn btn-sm btn-outline-secondary">
-                            <i className="ion-plus-round"></i>
-                            &nbsp; Follow {authorName} <span className="counter">(10)</span>
-                        </button>
+                        {profileData?.following ? (
+                            <button className="btn btn-sm btn-outline-secondary" onClick={handleUnfollow} disabled={unfollowLoading}>
+                                <i className="ion-minus-round"></i>
+                                &nbsp; Unfollow {profileData?.username}
+                            </button>
+                        ) : (
+                            <button className="btn btn-sm btn-outline-secondary" onClick={handleFollow} disabled={followLoading}>
+                                <i className="ion-plus-round"></i>
+                                &nbsp; Follow {profileData?.username}
+                            </button>
+                        )}
                         &nbsp;&nbsp;
                         <button className="btn btn-sm btn-outline-primary mx-2" onClick={favorited ? handleUnfavorite : handleFavorite} disabled={loadingFavorite}>
                             <i className="ion-heart"></i>
                             &nbsp; {favorited ? 'Unfavorite Post' : 'Favorite Post'} <span className="counter">({favoritesCount})</span>
                         </button>
-                        <button onClick={() => {
-                            navigate(`/edit-article/${slug}`)
-                        }} className="btn btn-sm btn-outline-secondary mx-2">
+                        <button onClick={() => navigate(`/edit-article/${slug}`)} className="btn btn-sm btn-outline-secondary mx-2">
                             <i className="ion-edit"></i> Edit Article
                         </button>
                         <button onClick={handleDelete} className="btn btn-sm btn-outline-danger">
@@ -206,7 +187,7 @@ const Article: React.FC = () => {
                 </div>
             </div>
 
-            <div className="container page">
+            <div className="container page px-3 lg:px-40">
                 <div className="row article-content">
                     <div className="col-md-12">
                         <p>{description}</p>
@@ -238,7 +219,6 @@ const Article: React.FC = () => {
                     </div>
                 </form>
 
-
                 {Array.isArray(commentsData) && (
                     <div>
                         {commentsData.map((comment: any) => (
@@ -253,12 +233,10 @@ const Article: React.FC = () => {
 
                                     <span className="mod-options">
                                         <IconButton onClick={() => handleDeleteComment(comment.id)}>
-                                            <svg color='red' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            <svg color='red' xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                             </svg>
                                         </IconButton>
-
-                                        {/* <i className="ion-trash-a"></i> */}
                                     </span>
                                 </div>
                             </div>
@@ -271,6 +249,8 @@ const Article: React.FC = () => {
 };
 
 export default Article;
+
+
 
 
 
