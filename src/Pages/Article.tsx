@@ -94,7 +94,7 @@ const Article: React.FC = () => {
                 console.error('Failed to favorite article:', error);
             } finally {
                 setLoadingFavorite(false);
-                refetchData();
+               
             }
         }
     };
@@ -105,6 +105,7 @@ const Article: React.FC = () => {
             try {
                 await unfavoriteArticleMutation(slug!).unwrap();
                 setFavorited(false);
+                refetchData();
             } catch (error) {
                 console.error('Failed to unfavorite article:', error);
             } finally {
