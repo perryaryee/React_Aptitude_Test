@@ -26,7 +26,7 @@ const Article: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
 
     // Fetch article data based on the slug
-    const { data: articleData, error: articleError, isLoading: articleLoading } = useFetchOneArticleDataQuery(slug || '');
+    const { data: articleData, error: articleError, isLoading: articleLoading,refetch: refetchData } = useFetchOneArticleDataQuery(slug || '');
 
     // Fetch comments for the article
     const { data: commentsData, error: commentsError, isLoading: commentsLoading, refetch } = useGetArticleCommentsQuery(slug || '');
@@ -89,10 +89,12 @@ const Article: React.FC = () => {
             try {
                 await favoriteArticleMutation(slug!).unwrap();
                 setFavorited(true);
+                refetchData();
             } catch (error) {
                 console.error('Failed to favorite article:', error);
             } finally {
                 setLoadingFavorite(false);
+                refetchData();
             }
         }
     };

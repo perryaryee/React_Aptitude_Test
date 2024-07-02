@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 
 const ArticleFavourites: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
-    const { data, error, isLoading } = useFetchOneArticleDataQuery(slug!);
+    const { data, error, isLoading, refetch: refetchData } = useFetchOneArticleDataQuery(slug!);
 
     const [favoriteArticleMutation] = useFavoriteArticleMutation();
     const [unfavoriteArticleMutation] = useUnfavoriteArticleMutation();
@@ -29,6 +29,7 @@ const ArticleFavourites: React.FC = () => {
             try {
                 await favoriteArticleMutation(slug!).unwrap();
                 setFavorited(true);
+                refetchData()
             } catch (error) {
                 console.error('Failed to favorite article:', error);
             } finally {
@@ -43,6 +44,7 @@ const ArticleFavourites: React.FC = () => {
             try {
                 await unfavoriteArticleMutation(slug!).unwrap();
                 setFavorited(false);
+                refetchData()
             } catch (error) {
                 console.error('Failed to unfavorite article:', error);
             } finally {
@@ -117,9 +119,9 @@ const ArticleFavourites: React.FC = () => {
                         <a href={`/profile/${authorName}`}><img src={authorImage} alt={authorName} /></a>
                         <div className="info">
                             <a href={`/profile/${authorName}`} className="author">{authorName}</a>
-                            <span className="date"> 
-                            { dayjs(createdAt).format('MMMM D, YYYY h:mm A')}
-                                </span>
+                            <span className="date">
+                                {dayjs(createdAt).format('MMMM D, YYYY h:mm A')}
+                            </span>
                         </div>
                         <div>
                             {profileData?.following ? <button disabled={unfollowLoading || followLoading}
